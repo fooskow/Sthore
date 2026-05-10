@@ -84,7 +84,7 @@ private fun HeaderCard() {
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Text(
-                text = "Sthore",
+                text = "eSthore",
                 color = Color(0xFFF6F1FF),
                 fontSize = 30.sp,
                 fontWeight = FontWeight.Bold
