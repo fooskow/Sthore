@@ -1,10 +1,10 @@
 object Libs {
     const val ktLintVersion = "0.43.2"
-    const val androidGradlePlugin = "com.android.tools.build:gradle:7.1.2"
+    const val androidGradlePlugin = "com.android.tools.build:gradle:7.3.1"
     const val ktLint = "com.pinterest:ktlint:$ktLintVersion"
 
     object Kotlin {
-        private const val version = "1.6.10"
+        private const val version = "1.8.10"
         const val stdlib = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version"
         const val gradlePlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$version"
         const val extensions = "org.jetbrains.kotlin:kotlin-android-extensions:$version"
