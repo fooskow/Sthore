@@ -22,16 +22,21 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Card
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -43,6 +48,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
@@ -53,15 +59,15 @@ import com.example.catalogapp.downloader.CatalogDownloader
 import com.example.catalogapp.downloader.CatalogItem
 import com.example.catalogapp.downloader.CatalogSection
 
-private val Cream = androidx.compose.ui.graphics.Color(0xFFFFF3D6)
-private val CreamSurface = androidx.compose.ui.graphics.Color(0xFFFFE8BE)
-private val Orange = androidx.compose.ui.graphics.Color(0xFFFF9F2A)
-private val OrangeDeep = androidx.compose.ui.graphics.Color(0xFFE27C10)
-private val Brown = androidx.compose.ui.graphics.Color(0xFF7A4212)
-private val Ink = androidx.compose.ui.graphics.Color(0xFF2B1A0B)
-private val SoftShadow = androidx.compose.ui.graphics.Color(0x33A85A00)
-private val Panel = androidx.compose.ui.graphics.Color(0xFFFFF9EC)
-private val PanelMuted = androidx.compose.ui.graphics.Color(0xFFFFE2AA)
+private val Cream = Color(0xFFFFF3D6)
+private val CreamSurface = Color(0xFFFFE8BE)
+private val Orange = Color(0xFFFF9F2A)
+private val OrangeDeep = Color(0xFFE27C10)
+private val Brown = Color(0xFF7A4212)
+private val Ink = Color(0xFF2B1A0B)
+private val SoftShadow = Color(0x33A85A00)
+private val Panel = Color(0xFFFFF9EC)
+private val PanelMuted = Color(0xFFFFE2AA)
 
 private enum class ScreenTab(val title: String) {
     Catalog("Catalog"),
@@ -82,7 +88,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun ESthoreApp() {
     val downloader = remember { CatalogDownloader() }
@@ -124,12 +130,13 @@ private fun ESthoreApp() {
                         )
                     }
                 },
-                backgroundColor = CreamSurface,
-                contentColor = Ink,
-                elevation = 8.dp
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = CreamSurface,
+                    titleContentColor = Ink
+                )
             )
         },
-        backgroundColor = Cream
+        containerColor = Cream
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -183,8 +190,8 @@ private fun ESthoreApp() {
 private fun HeroCard() {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        backgroundColor = CreamSurface,
-        elevation = 8.dp,
+        colors = CardDefaults.cardColors(containerColor = CreamSurface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
         shape = RoundedCornerShape(22.dp)
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
@@ -203,15 +210,15 @@ private fun HeroCard() {
             )
             Spacer(modifier = Modifier.height(12.dp))
             Card(
-                backgroundColor = Orange,
-                elevation = 0.dp,
+                colors = CardDefaults.cardColors(containerColor = Orange),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                 shape = RoundedCornerShape(22.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
                     text = "Two-column catalog cards, cover art, and a settings panel that actually saves.",
                     modifier = Modifier.padding(14.dp),
-                    color = androidx.compose.ui.graphics.Color.White,
+                    color = Color.White,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -229,10 +236,9 @@ private fun TabBar(selectedTab: ScreenTab, onSelect: (ScreenTab) -> Unit) {
                 onClick = { onSelect(tab) },
                 shape = RoundedCornerShape(22.dp),
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = if (isSelected) OrangeDeep else PanelMuted,
-                    contentColor = if (isSelected) androidx.compose.ui.graphics.Color.White else Ink
-                ),
-                elevation = ButtonDefaults.elevation(defaultElevation = 4.dp, pressedElevation = 0.dp)
+                    containerColor = if (isSelected) OrangeDeep else PanelMuted,
+                    contentColor = if (isSelected) Color.White else Ink
+                )
             ) {
                 Text(text = tab.title, fontWeight = FontWeight.Bold)
             }
@@ -250,8 +256,8 @@ private fun CatalogGridScreen(
 ) {
     Card(
         modifier = Modifier.fillMaxSize(),
-        backgroundColor = Panel,
-        elevation = 6.dp,
+        colors = CardDefaults.cardColors(containerColor = Panel),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         shape = RoundedCornerShape(22.dp)
     ) {
         when {
@@ -323,8 +329,8 @@ private fun CatalogCard(
         modifier = Modifier
             .fillMaxWidth()
             .border(1.dp, SoftShadow, RoundedCornerShape(22.dp)),
-        backgroundColor = androidx.compose.ui.graphics.Color(0xFFFFFBF2),
-        elevation = 0.dp,
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFBF2)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         shape = RoundedCornerShape(22.dp)
     ) {
         Column(
@@ -343,17 +349,17 @@ private fun CatalogCard(
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
-                Surface(
-                    color = Orange,
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = Orange),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                     shape = RoundedCornerShape(16.dp),
-                    elevation = 0.dp,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(8.dp)
                 ) {
                     Text(
                         text = item.tag,
-                        color = androidx.compose.ui.graphics.Color.White,
+                        color = Color.White,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
@@ -381,11 +387,16 @@ private fun CatalogCard(
                 onClick = onDownload,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(18.dp),
-                colors = ButtonDefaults.buttonColors(backgroundColor = OrangeDeep)
+                colors = ButtonDefaults.buttonColors(containerColor = OrangeDeep)
             ) {
+                androidx.compose.material3.Icon(
+                    imageVector = Icons.Filled.Download,
+                    contentDescription = null,
+                    modifier = Modifier.padding(end = 6.dp)
+                )
                 Text(
                     text = if (downloaded) "Downloaded" else "Download",
-                    color = androidx.compose.ui.graphics.Color.White,
+                    color = Color.White,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -409,8 +420,8 @@ private fun SettingsScreen(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        backgroundColor = Panel,
-        elevation = 6.dp,
+        colors = CardDefaults.cardColors(containerColor = Panel),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         shape = RoundedCornerShape(22.dp)
     ) {
         Column(
@@ -446,9 +457,9 @@ private fun SettingsScreen(
                         onSave()
                     },
                     shape = RoundedCornerShape(18.dp),
-                    colors = ButtonDefaults.buttonColors(backgroundColor = OrangeDeep)
+                    colors = ButtonDefaults.buttonColors(containerColor = OrangeDeep)
                 ) {
-                    Text(text = "Save", color = androidx.compose.ui.graphics.Color.White)
+                    Text(text = "Save", color = Color.White)
                 }
             }
             Text(
@@ -468,8 +479,8 @@ private fun SettingsScreen(
 private fun StatusCard(message: String) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        backgroundColor = PanelMuted,
-        elevation = 2.dp,
+        colors = CardDefaults.cardColors(containerColor = PanelMuted),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(18.dp)
     ) {
         Text(
