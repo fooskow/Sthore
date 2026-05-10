@@ -14,7 +14,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
@@ -28,48 +30,68 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.catalogapp.downloader.CatalogDownloader
+import com.example.catalogapp.downloader.CatalogSection
+
+private val Cream = Color(0xFFFFF3D6)
+private val CreamSurface = Color(0xFFFFE8BE)
+private val Orange = Color(0xFFFF9F2A)
+private val OrangeDeep = Color(0xFFE27C10)
+private val Brown = Color(0xFF7A4212)
+private val Ink = Color(0xFF2B1A0B)
+private val SoftShadow = Color(0x33A85A00)
+private val Panel = Color(0xFFFFF9EC)
+private val PanelMuted = Color(0xFFFFE2AA)
+
+private enum class ScreenTab(val title: String) {
+    Catalog("Catalog"),
+    Settings("Settings")
+}
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            Surface(color = Color(0xFF0B0F1A)) {
-                CatalogShell()
+            MaterialTheme {
+                Surface(color = Cream) {
+                    SthoreShell()
+                }
             }
         }
     }
 }
 
 @Composable
-private fun CatalogShell() {
-    val shellGradient = Brush.linearGradient(
-        colors = listOf(Color(0xFF1B2450), Color(0xFF101426), Color(0xFF090B12)),
-        start = Offset.Zero,
-        end = Offset(900f, 1600f)
-    )
-    var selectedTab by remember { mutableStateOf(0) }
+private fun SthoreShell() {
+    val downloader = remember { CatalogDownloader() }
+    val catalogSections = remember { downloader.loadCatalog() }
+    var selectedTab by remember { mutableStateOf(ScreenTab.Catalog) }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(shellGradient)
+            .background(Cream)
             .padding(16.dp)
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             HeaderCard()
-            TabRow(selectedTab = selectedTab, onSelect = { selectedTab = it })
-            MainCard(selectedTab = selectedTab)
-            Spacer(modifier = Modifier.weight(1f))
-            FooterStrip()
+            TabBar(
+                selectedTab = selectedTab,
+                onSelect = { selectedTab = it }
+            )
+            when (selectedTab) {
+                ScreenTab.Catalog -> CatalogScreen(catalogSections)
+                ScreenTab.Settings -> SettingsScreen()
+            }
         }
     }
 }
@@ -78,106 +100,184 @@ private fun CatalogShell() {
 private fun HeaderCard() {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        backgroundColor = Color(0xFF151C33),
-        elevation = 10.dp,
-        shape = RoundedCornerShape(24.dp)
+        backgroundColor = CreamSurface,
+        elevation = 8.dp,
+        shape = RoundedCornerShape(22.dp)
     ) {
-        Column(modifier = Modifier.padding(20.dp)) {
+        Column(modifier = Modifier.padding(18.dp)) {
             Text(
-                text = "eSthore",
-                color = Color(0xFFF6F1FF),
+                text = "Sthore",
+                color = Ink,
                 fontSize = 30.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.ExtraBold
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "A 3DS-style Android app skeleton",
-                color = Color(0xFFB8C2FF),
-                fontSize = 14.sp
+                text = "3DS eShop skeleton in an orange / cream shell",
+                color = Brown,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Card(
+                backgroundColor = Orange,
+                elevation = 0.dp,
+                shape = RoundedCornerShape(22.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Touch-friendly cards, rounded panels, and a handheld-console layout.",
+                    modifier = Modifier.padding(14.dp),
+                    color = Color.White,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun TabBar(selectedTab: ScreenTab, onSelect: (ScreenTab) -> Unit) {
+    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        ScreenTab.values().forEach { tab ->
+            val isSelected = selectedTab == tab
+            Button(
+                onClick = { onSelect(tab) },
+                shape = RoundedCornerShape(22.dp),
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = if (isSelected) OrangeDeep else PanelMuted,
+                    contentColor = if (isSelected) Color.White else Ink
+                ),
+                elevation = ButtonDefaults.elevation(defaultElevation = 4.dp, pressedElevation = 0.dp)
+            ) {
+                Text(text = tab.title, fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+@Composable
+private fun CatalogScreen(sections: List<CatalogSection>) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        sections.forEach { section ->
+            SectionCard(section)
+        }
+    }
+}
+
+@Composable
+private fun SectionCard(section: CatalogSection) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        backgroundColor = Panel,
+        elevation = 6.dp,
+        shape = RoundedCornerShape(22.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = section.title,
+                color = Ink,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+            section.items.forEach { item ->
+                CatalogTile(
+                    title = item.title,
+                    subtitle = item.subtitle,
+                    tag = item.tag
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CatalogTile(title: String, subtitle: String, tag: String) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, SoftShadow, RoundedCornerShape(22.dp)),
+        backgroundColor = Color(0xFFFFFBF2),
+        elevation = 0.dp,
+        shape = RoundedCornerShape(22.dp)
+    ) {
+        Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(text = title, color = OrangeDeep, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
+                Surface(color = Orange, shape = RoundedCornerShape(22.dp), elevation = 0.dp) {
+                    Text(
+                        text = tag,
+                        color = Color.White,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                    )
+                }
+            }
+            Text(text = subtitle, color = Brown, fontSize = 13.sp)
+        }
+    }
+}
+
+@Composable
+private fun SettingsScreen() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        backgroundColor = Panel,
+        elevation = 6.dp,
+        shape = RoundedCornerShape(22.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = "Settings",
+                color = Ink,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+            SettingRow(
+                label = "Handheld mode",
+                value = "Landscape only"
+            )
+            SettingRow(
+                label = "Palette",
+                value = "Orange / cream"
+            )
+            SettingRow(
+                label = "Sections",
+                value = "Catalog + Settings"
             )
         }
     }
 }
 
 @Composable
-private fun TabRow(selectedTab: Int, onSelect: (Int) -> Unit) {
-    val tabs = listOf("Library", "Catalog", "Settings")
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        tabs.forEachIndexed { index, title ->
-            Button(
-                onClick = { onSelect(index) },
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = if (selectedTab == index) Color(0xFFFF4FD8) else Color(0xFF26314F)
-                ),
-                shape = RoundedCornerShape(18.dp)
-            ) {
-                Text(text = title, color = Color.White)
-            }
-        }
-    }
-}
-
-@Composable
-private fun MainCard(selectedTab: Int) {
-    val title = when (selectedTab) {
-        0 -> "Featured titles"
-        1 -> "Browse the catalog"
-        else -> "System options"
-    }
-
-    val body = when (selectedTab) {
-        0 -> "Launch your favorite items, continue progress, and keep the UI focused on a handheld-console feel."
-        1 -> "This skeleton is ready for product grids, detail pages, and future repository-backed content."
-        else -> "Add preferences, save data, and account screens here when the app grows beyond the starter shell."
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(2.dp, Color(0xFF8B7CFF), RoundedCornerShape(28.dp))
-            .background(Color(0xFF11182B), RoundedCornerShape(28.dp))
-            .padding(18.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Text(text = title, color = Color(0xFFFFE66D), fontSize = 22.sp, fontWeight = FontWeight.SemiBold)
-        Text(text = body, color = Color(0xFFE5E9FF), fontSize = 15.sp)
-
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            backgroundColor = Color(0xFF1D2745),
-            elevation = 6.dp,
-            shape = RoundedCornerShape(20.dp)
-        ) {
-            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                CatalogRow(primary = "Storefront", secondary = "3 sections ready to wire")
-                CatalogRow(primary = "Handheld layout", secondary = "Top screen + touch-friendly cards")
-                CatalogRow(primary = "Build pipeline", secondary = "GitHub Actions debug APK artifact")
-            }
-        }
-    }
-}
-
-@Composable
-private fun CatalogRow(primary: String, secondary: String) {
-    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(text = primary, color = Color(0xFFF7F8FF), fontWeight = FontWeight.Medium)
-        Text(text = secondary, color = Color(0xFFB5BEDD), fontSize = 13.sp)
-    }
-}
-
-@Composable
-private fun FooterStrip() {
-    Surface(
+private fun SettingRow(label: String, value: String) {
+    Card(
         modifier = Modifier.fillMaxWidth(),
-        color = Color(0xFF151A2A),
-        shape = RoundedCornerShape(18.dp),
-        elevation = 4.dp
+        backgroundColor = Color(0xFFFFF8EA),
+        elevation = 0.dp,
+        shape = RoundedCornerShape(22.dp)
     ) {
-        Text(
-            text = "Ready for feature screens, lists, and game-card layouts.",
-            modifier = Modifier.padding(14.dp),
-            color = Color(0xFF9FB0FF),
-            fontSize = 13.sp
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = label, color = Ink, fontWeight = FontWeight.SemiBold)
+            Text(text = value, color = OrangeDeep, fontWeight = FontWeight.Bold)
+        }
     }
 }
