@@ -30,6 +30,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -70,8 +71,7 @@ private val Panel = Color(0xFFFFF9EC)
 private val PanelMuted = Color(0xFFFFE2AA)
 
 private enum class ScreenTab(val title: String) {
-    Catalog("Catalog"),
-    Settings("Settings")
+    Catalog("Catalog"), Settings("Settings")
 }
 
 class MainActivity : ComponentActivity() {
@@ -389,7 +389,7 @@ private fun CatalogCard(
                 shape = RoundedCornerShape(18.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = OrangeDeep)
             ) {
-                androidx.compose.material3.Icon(
+                Icon(
                     imageVector = Icons.Filled.Download,
                     contentDescription = null,
                     modifier = Modifier.padding(end = 6.dp)
