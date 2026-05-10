@@ -3,16 +3,20 @@ plugins {
     id("kotlin-android")
     id("kotlin-kapt")
 }
+
 android {
+    namespace = "com.example.catalogapp"
     compileSdk = Libs.App.compileSdkVersion
+
     defaultConfig {
-        applicationId = Libs.App.applicationId
+        applicationId = "com.example.catalogapp"
         minSdk = Libs.App.minSdkVersion
         targetSdk = Libs.App.targetSdkVersion
         versionCode = ReleaseConfig.appVersionCode
         versionName = ReleaseConfig.appVersionName
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+
     buildTypes {
         getByName("release") {
             isMinifyEnabled = true
@@ -30,6 +34,7 @@ android {
             )
         }
     }
+
     buildFeatures {
         compose = true
         buildConfig = false
@@ -38,13 +43,18 @@ android {
         resValues = false
         shaders = false
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
 
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+
     packagingOptions {
-       resources.excludes.add("/META-INF/AL2.0")
+        resources.excludes.add("/META-INF/AL2.0")
         resources.excludes.add("/META-INF/LGPL2.1")
     }
 
@@ -69,5 +79,4 @@ dependencies {
     androidTestImplementation(Libs.AndroidX.Test.rules)
     androidTestImplementation(Libs.AndroidX.Test.runner)
     androidTestImplementation(Libs.AndroidX.Test.Ext.junit)
-
 }
