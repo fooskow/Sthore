@@ -24,6 +24,8 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -56,9 +58,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.example.catalogapp.downloader.CatalogDownloader
-import com.example.catalogapp.downloader.CatalogItem
-import com.example.catalogapp.downloader.CatalogSection
 
 private val Cream = Color(0xFFFFF3D6)
 private val CreamSurface = Color(0xFFFFE8BE)
@@ -74,9 +73,58 @@ private enum class ScreenTab(val title: String) {
     Catalog("Catalog"), Settings("Settings")
 }
 
+data class CatalogSection(
+    val title: String,
+    val items: List<CatalogItem>
+)
+
+data class CatalogItem(
+    val title: String,
+    val subtitle: String,
+    val tag: String,
+    val imageUrl: String?
+)
+
+private val demoSections = listOf(
+    CatalogSection(
+        title = "Featured",
+        items = listOf(
+            CatalogItem(
+                title = "Retro Runner",
+                subtitle = "Fast-paced platforming with bold colors and crisp art.",
+                tag = "Hot",
+                imageUrl = "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=900&q=80"
+            ),
+            CatalogItem(
+                title = "Sky Grid",
+                subtitle = "Puzzle strategy with a clean handheld dashboard feel.",
+                tag = "New",
+                imageUrl = "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80"
+            )
+        )
+    ),
+    CatalogSection(
+        title = "Deals",
+        items = listOf(
+            CatalogItem(
+                title = "Pocket Quest",
+                subtitle = "Adventure game card with room for ratings and price.",
+                tag = "-20%",
+                imageUrl = "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=900&q=80"
+            ),
+            CatalogItem(
+                title = "Color Burst",
+                subtitle = "Bright, arcade-inspired storefront tile for the library.",
+                tag = "Sale",
+                imageUrl = "https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?auto=format&fit=crop&w=900&q=80"
+            )
+        )
+    )
+)
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
@@ -91,29 +139,26 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun ESthoreApp() {
-    val downloader = remember { CatalogDownloader() }
     var selectedTab by remember { mutableStateOf(ScreenTab.Catalog) }
-    var activeCatalogUrl by rememberSaveable { mutableStateOf("") }
-    var draftCatalogUrl by rememberSaveable { mutableStateOf("") }
-    var catalogSections by remember { mutableStateOf<List<CatalogSection>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(true) }
-    var statusMessage by rememberSaveable { mutableStateOf("Using the built-in catalog") }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
+    var statusMessage by rememberSaveable { mutableStateOf("Browse the eShop-style catalog") }
     var downloadedTitles by remember { mutableStateOf(setOf<String>()) }
 
-    LaunchedEffect(activeCatalogUrl) {
-        isLoading = true
-        catalogSections = downloader.loadCatalog(activeCatalogUrl)
-        statusMessage = if (activeCatalogUrl.isBlank()) {
-            "Showing the built-in catalog"
+    val filteredSections = remember(searchQuery) {
+        val normalized = searchQuery.trim().lowercase()
+        if (normalized.isBlank()) {
+            demoSections
         } else {
-            "Loaded catalog from $activeCatalogUrl"
-        }
-        isLoading = false
-    }
-
-    LaunchedEffect(selectedTab, activeCatalogUrl) {
-        if (selectedTab == ScreenTab.Settings) {
-            draftCatalogUrl = activeCatalogUrl
+            demoSections.map { section ->
+                section.copy(
+                    items = section.items.filter {
+                        it.title.lowercase().contains(normalized) ||
+                            it.subtitle.lowercase().contains(normalized) ||
+                            it.tag.lowercase().contains(normalized)
+                    }
+                )
+            }.filter { it.items.isNotEmpty() }
         }
     }
 
@@ -129,6 +174,13 @@ private fun ESthoreApp() {
                             color = Brown
                         )
                     }
+                },
+                actions = {
+                    Icon(
+                        imageVector = Icons.Filled.ShoppingCart,
+                        contentDescription = null,
+                        tint = Brown
+                    )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = CreamSurface,
@@ -146,6 +198,10 @@ private fun ESthoreApp() {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             HeroCard()
+            SearchBar(
+                query = searchQuery,
+                onQueryChange = { searchQuery = it }
+            )
             TabBar(
                 selectedTab = selectedTab,
                 onSelect = { selectedTab = it }
@@ -158,25 +214,23 @@ private fun ESthoreApp() {
                             .fillMaxWidth()
                     ) {
                         CatalogGridScreen(
-                            sections = catalogSections,
+                            sections = filteredSections,
                             isLoading = isLoading,
                             downloadedTitles = downloadedTitles,
                             onDownload = { item ->
                                 downloadedTitles = downloadedTitles + item.title
-                                statusMessage = "Queued ${item.title} for download"
+                                statusMessage = "Queued " + item.title + " for download"
                             }
                         )
                     }
                 }
                 ScreenTab.Settings -> {
                     SettingsScreen(
-                        currentCatalogUrl = activeCatalogUrl,
-                        draftCatalogUrl = draftCatalogUrl,
-                        onCatalogUrlChange = { draftCatalogUrl = it },
-                        onSave = {
-                            val normalized = draftCatalogUrl.trim()
-                            draftCatalogUrl = normalized
-                            activeCatalogUrl = normalized
+                        statusMessage = statusMessage,
+                        onReload = {
+                            isLoading = true
+                            statusMessage = "Refreshing catalog"
+                            isLoading = false
                         }
                     )
                 }
@@ -228,6 +282,21 @@ private fun HeroCard() {
 }
 
 @Composable
+private fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
+    OutlinedTextField(
+        value = query,
+        onValueChange = onQueryChange,
+        modifier = Modifier.fillMaxWidth(),
+        leadingIcon = {
+            Icon(imageVector = Icons.Filled.Search, contentDescription = null)
+        },
+        label = { Text("Search catalog") },
+        singleLine = true,
+        shape = RoundedCornerShape(18.dp)
+    )
+}
+
+@Composable
 private fun TabBar(selectedTab: ScreenTab, onSelect: (ScreenTab) -> Unit) {
     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         ScreenTab.values().forEach { tab ->
@@ -271,7 +340,9 @@ private fun CatalogGridScreen(
             }
             sections.isEmpty() -> {
                 Box(
-                    modifier = Modifier.fillMaxSize().padding(24.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(24.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -344,7 +415,7 @@ private fun CatalogCard(
                     .background(PanelMuted, RoundedCornerShape(18.dp))
             ) {
                 AsyncImage(
-                    model = item.imageUrl?.takeIf { it.isNotBlank() } ?: android.R.drawable.sym_def_app_icon,
+                    model = item.imageUrl ?: android.R.drawable.sym_def_app_icon,
                     contentDescription = item.title,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
@@ -406,10 +477,8 @@ private fun CatalogCard(
 
 @Composable
 private fun SettingsScreen(
-    currentCatalogUrl: String,
-    draftCatalogUrl: String,
-    onCatalogUrlChange: (String) -> Unit,
-    onSave: () -> Unit
+    statusMessage: String,
+    onReload: () -> Unit
 ) {
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
@@ -437,37 +506,24 @@ private fun SettingsScreen(
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "Point the catalog at a JSON feed and save it to refresh the store.",
+                text = "This starter keeps the UI local and ready for catalog feeds, preferences, and downloads.",
                 color = Brown,
                 fontSize = 13.sp
-            )
-            OutlinedTextField(
-                value = draftCatalogUrl,
-                onValueChange = onCatalogUrlChange,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .focusRequester(focusRequester),
-                label = { Text("Catalog URL") },
-                singleLine = true
             )
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Button(
                     onClick = {
                         focusManager.clearFocus()
-                        onSave()
+                        onReload()
                     },
                     shape = RoundedCornerShape(18.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = OrangeDeep)
                 ) {
-                    Text(text = "Save", color = Color.White)
+                    Text(text = "Refresh", color = Color.White)
                 }
             }
             Text(
-                text = if (currentCatalogUrl.isBlank()) {
-                    "Current source: built-in catalog"
-                } else {
-                    "Current source: $currentCatalogUrl"
-                },
+                text = statusMessage,
                 color = Brown,
                 fontSize = 12.sp
             )
