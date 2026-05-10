@@ -3,7 +3,8 @@ package com.example.catalogapp.downloader
 data class CatalogItem(
     val title: String,
     val subtitle: String,
-    val tag: String
+    val tag: String,
+    val imageUrl: String? = null
 )
 
 data class CatalogSection(
@@ -21,29 +22,29 @@ object DefaultCatalogSource : CatalogSource {
             title = "Featured",
             items = listOf(
                 CatalogItem(
-                    title = "Nintendo classics",
-                    subtitle = "Highlighted games and launch-ready cards for the storefront.",
-                    tag = "TOP"
+                    title = "Sky Circuit",
+                    subtitle = "Fast-paced racing with a bright storefront card.",
+                    tag = "HOT"
                 ),
                 CatalogItem(
-                    title = "Daily picks",
-                    subtitle = "Curated rows for the home screen and future live data.",
+                    title = "Pocket Quest",
+                    subtitle = "Adventure pick with a clean cover frame and download button.",
                     tag = "NEW"
                 )
             )
         ),
         CatalogSection(
-            title = "Browse",
+            title = "Popular",
             items = listOf(
                 CatalogItem(
-                    title = "Demo shelf",
-                    subtitle = "Simple placeholder content for repository wiring.",
-                    tag = "UI"
+                    title = "Tiny Tower Defense",
+                    subtitle = "Quick sessions, playful art, and easy browsing.",
+                    tag = "TOP"
                 ),
                 CatalogItem(
-                    title = "Download queue",
-                    subtitle = "Ready for backend data, fetchers, and caching logic.",
-                    tag = "DATA"
+                    title = "Retro Rally",
+                    subtitle = "Classic handheld vibes for the grid layout.",
+                    tag = "PLAY"
                 )
             )
         )

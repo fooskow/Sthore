@@ -65,6 +65,7 @@ android {
 
 dependencies {
     implementation(Libs.Kotlin.stdlib)
+    implementation(Libs.Kotlin.Coroutines.android)
 
     implementation(Libs.AndroidX.Activity.activityCompose)
     implementation(Libs.AndroidX.Compose.runtime)
@@ -74,6 +75,7 @@ dependencies {
     implementation(Libs.AndroidX.Compose.animation)
     implementation(Libs.AndroidX.Compose.tooling)
     implementation(Libs.AndroidX.Lifecycle.viewModelCompose)
+    implementation("io.coil-kt:coil-compose:2.4.0")
 
     androidTestImplementation(Libs.AndroidX.Compose.uiTest)
     androidTestImplementation(Libs.AndroidX.Test.rules)
