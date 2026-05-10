@@ -1,24 +1,23 @@
 plugins {
     id("com.android.application")
-    id("kotlin-android")
-    id("kotlin-kapt")
+    id("org.jetbrains.kotlin.android")
 }
 
 android {
     namespace = "com.example.catalogapp"
-    compileSdk = Libs.App.compileSdkVersion
+    compileSdk = 33
 
     defaultConfig {
         applicationId = "com.example.catalogapp"
-        minSdk = Libs.App.minSdkVersion
-        targetSdk = Libs.App.targetSdkVersion
+        minSdk = 24
+        targetSdk = 33
         versionCode = ReleaseConfig.appVersionCode
         versionName = ReleaseConfig.appVersionName
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
-        getByName("release") {
+        release {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
@@ -26,7 +25,7 @@ android {
                 "proguard-rules.pro"
             )
         }
-        getByName("debug") {
+        debug {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -37,11 +36,6 @@ android {
 
     buildFeatures {
         compose = true
-        buildConfig = false
-        aidl = false
-        renderScript = false
-        resValues = false
-        shaders = false
     }
 
     compileOptions {
@@ -53,34 +47,32 @@ android {
         jvmTarget = "11"
     }
 
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.4.3"
+    }
+
     packagingOptions {
         resources.excludes.add("/META-INF/AL2.0")
         resources.excludes.add("/META-INF/LGPL2.1")
     }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = Libs.AndroidX.Compose.version
-    }
 }
 
 dependencies {
-    implementation(Libs.Kotlin.stdlib)
-    implementation(Libs.Kotlin.Coroutines.android)
-
-    implementation(Libs.AndroidX.Activity.activityCompose)
-    implementation(Libs.AndroidX.Compose.runtime)
-    implementation(Libs.AndroidX.Compose.foundation)
-    implementation(Libs.AndroidX.Compose.material)
-    implementation(Libs.AndroidX.Compose.layout)
-    implementation(Libs.AndroidX.Compose.animation)
-    implementation(Libs.AndroidX.Compose.tooling)
-    implementation(Libs.AndroidX.Lifecycle.viewModelCompose)
-    implementation("androidx.compose.material3:material3:1.0.0")
-    implementation("androidx.compose.material:material-icons-extended:1.2.0")
+    implementation("androidx.activity:activity-compose:1.7.2")
+    implementation("androidx.compose.ui:ui:1.4.3")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.4.3")
+    implementation("androidx.compose.foundation:foundation:1.4.3")
+    implementation("androidx.compose.material3:material3:1.1.0")
+    implementation("androidx.compose.material:material-icons-extended:1.4.3")
     implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+    implementation("androidx.core:core-ktx:1.10.1")
 
-    androidTestImplementation(Libs.AndroidX.Compose.uiTest)
-    androidTestImplementation(Libs.AndroidX.Test.rules)
-    androidTestImplementation(Libs.AndroidX.Test.runner)
-    androidTestImplementation(Libs.AndroidX.Test.Ext.junit)
+    debugImplementation("androidx.compose.ui:ui-tooling:1.4.3")
+    debugImplementation("androidx.compose.ui:ui-test-manifest:1.4.3")
+
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.4.3")
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test:runner:1.5.2")
+    androidTestImplementation("androidx.test:rules:1.5.0")
 }
